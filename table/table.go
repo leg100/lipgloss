@@ -61,6 +61,7 @@ type Table struct {
 	height          int
 	useManualHeight bool
 	offset          int
+	overflowRow     bool
 
 	// widths tracks the width of each column.
 	widths []int
@@ -85,6 +86,12 @@ func New() *Table {
 		borderTop:    true,
 		data:         NewStringData(),
 	}
+}
+
+// DisableOverflowRow disables the overflow row.
+func (t *Table) DisableOverflowRow() *Table {
+	t.overflowRow = false
+	return t
 }
 
 // ClearRows clears the table rows.
@@ -508,7 +515,7 @@ func (t *Table) constructRows(availableLines int) string {
 	rowsToRender = max(rowsToRender, 1)
 
 	// Check if we need to render an overflow row.
-	needsOverflow := rowsToRender < offsetRowCount
+	needsOverflow := t.overflowRow && rowsToRender < offsetRowCount
 
 	// only use the offset as the starting value if there is overflow.
 	rowIdx := t.offset
