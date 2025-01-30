@@ -412,6 +412,16 @@ func (t *Table) computeWidth() int {
 	return width
 }
 
+// NonRowHeight computes the height of everything excluding the rows
+// themselves, i.e. borders, headers, etc.
+func (t *Table) NonRowHeight() int {
+	hasHeaders := len(t.headers) > 0
+	// What's the -1 for?
+	return -1 + btoi(hasHeaders) +
+		btoi(t.borderTop) + btoi(t.borderBottom) +
+		btoi(t.borderHeader) + t.data.Rows()*btoi(t.borderRow)
+}
+
 // computeHeight computes the height of the table in it's current configuration.
 func (t *Table) computeHeight() int {
 	hasHeaders := len(t.headers) > 0
