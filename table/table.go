@@ -412,14 +412,18 @@ func (t *Table) computeWidth() int {
 	return width
 }
 
-// NonRowHeight computes the height of everything excluding the rows
-// themselves, i.e. borders, headers, etc.
-func (t *Table) NonRowHeight() int {
+// AvailableRows computes the number of available rows.
+func (t *Table) AvailableRows() int {
 	hasHeaders := len(t.headers) > 0
-	// What's the -1 for?
-	return -1 + btoi(hasHeaders) +
-		btoi(t.borderTop) + btoi(t.borderBottom) +
-		btoi(t.borderHeader) + t.data.Rows()*btoi(t.borderRow)
+
+	avail := t.height
+	avail -= btoi(hasHeaders)
+	avail -= btoi(t.borderTop)
+	avail -= btoi(t.borderBottom)
+	avail -= btoi(t.borderHeader)
+	avail -= t.data.Rows() * btoi(t.borderRow)
+
+	return max(1, avail)
 }
 
 // computeHeight computes the height of the table in it's current configuration.
@@ -532,7 +536,7 @@ func (t *Table) constructRows(availableLines int) string {
 	if !needsOverflow {
 		// if there is no overflow, just render to the height of the table
 		// check there's enough content to fill the table
-		rowIdx = t.data.Rows() - rowsToRender
+		//rowIdx = t.data.Rows() - rowsToRender
 	}
 	for rowsToRender > 0 && rowIdx < t.data.Rows() {
 		// Whenever the height is too small to render all rows, the bottom row will be an overflow row (ellipsis).
