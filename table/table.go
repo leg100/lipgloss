@@ -64,6 +64,7 @@ type Table struct {
 	useManualHeight bool
 	yOffset         int
 	wrap            bool
+	overflow        bool
 
 	widths  []int
 	heights []int
@@ -88,6 +89,7 @@ func New() *Table {
 		borderTop:    true,
 		wrap:         true,
 		data:         NewStringData(),
+		overflow:     true,
 	}
 }
 
@@ -159,6 +161,12 @@ func (t *Table) Headers(headers ...string) *Table {
 // GetHeaders returns the table headers.
 func (t *Table) GetHeaders() []string {
 	return t.headers
+}
+
+// Overflow enables/disables the overflow row.
+func (t *Table) Overflow(v bool) *Table {
+	t.overflow = v
+	return t
 }
 
 // Border sets the table border.
@@ -482,7 +490,7 @@ func (t *Table) constructRow(index int) string {
 	hasHeaders := len(t.headers) > 0
 	height := t.heights[index+btoi(hasHeaders)]
 	isLastRow := index == t.data.Rows()-1
-	isOverflow := !isLastRow && t.lastVisibleRowIndex == index
+	isOverflow := t.overflow && !isLastRow && t.lastVisibleRowIndex == index
 	if isOverflow {
 		height = max(height, 1)
 	}
@@ -526,7 +534,7 @@ func (t *Table) constructRow(index int) string {
 
 	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, cells...) + "\n")
 
-	if t.borderRow && !isOverflow && index < t.data.Rows()-1 {
+	if t.borderRow && t.lastVisibleRowIndex != index && !isOverflow && index < t.data.Rows()-1 {
 		if t.borderLeft {
 			s.WriteString(t.borderStyle.Render(t.border.MiddleLeft))
 		}
